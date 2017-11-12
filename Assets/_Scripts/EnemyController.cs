@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyController : MonoBehaviour {
 	
@@ -15,6 +16,9 @@ public class EnemyController : MonoBehaviour {
 
 	public event EventHandler OnDead;
 
+	private GameObject _canvas;
+	private RectTransform _canvasTransform;
+	private RectTransform _hpBar;
 	private Material _material;
 	private Color _originalColor;
 	private bool _shoot = true;
@@ -24,6 +28,9 @@ public class EnemyController : MonoBehaviour {
 		StartCoroutine(Fire());
 		_material = GetComponent<MeshRenderer>().material;
 		_originalColor = _material.color;
+		_canvas = transform.Find("Canvas").gameObject;
+		_hpBar = _canvas.transform.Find("Foreground").GetComponent<RectTransform>();
+		_canvasTransform = _canvas.GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -31,6 +38,9 @@ public class EnemyController : MonoBehaviour {
 		var dir = PlayerCamera.transform.position - transform.position;
 		dir.y = 0;
 		transform.rotation = Quaternion.LookRotation(dir);
+		// Point HP bar to camera
+		var canvasDir = PlayerCamera.transform.position - transform.position;
+		_canvasTransform.rotation = Quaternion.LookRotation(canvasDir);
 	}
 	
 	private IEnumerator Fire()
@@ -54,6 +64,7 @@ public class EnemyController : MonoBehaviour {
 		Health = Mathf.Max(0, Health - 5);
 		_material.color = Color.red;
 		_material.DOColor(_originalColor, 0.5f);
+		_hpBar.DOScaleX((float) Health / MaxHealth, 0.5f);
 		if (Health <= 0)
 		{
 			OnDead?.Invoke();
