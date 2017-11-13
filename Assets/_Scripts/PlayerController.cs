@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    private Camera _camera;
+    public ScoreManager Score;
     public GameObject HitFlash;
-
     public int MaxHealth = 100;
     public int HealthPoints = 100;
-    
     public Weapon CurrentWeapon;
-
-    public delegate void EventHandler();
-
-    public static event EventHandler OnDamageTaken;
-
-    private bool _shooting;
     public Transform InventoryTransform;
+
+    private Camera _camera;
+    private bool _shooting;
+    
+    public delegate void EventHandler();
+    public static event EventHandler OnDamageTaken;
 
     private void Start()
     {
         _camera = GetComponent<Camera>();
+        Score.CurrentScore = 0;
     }
 
     private void Update()
@@ -93,5 +93,13 @@ public class PlayerController : MonoBehaviour
     {
         HealthPoints = Mathf.Max(0, HealthPoints - ammount);
         OnDamageTaken?.Invoke();
+        if (HealthPoints <= 0)
+        {
+            if (Score.CurrentScore > Score.HighScore)
+            {
+                Score.HighScore = Score.CurrentScore;
+            }
+            SceneManager.LoadScene("EndGame");
+        }
     }
 }

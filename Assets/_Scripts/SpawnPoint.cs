@@ -5,10 +5,10 @@ using Vuforia;
 
 public class SpawnPoint : MonoBehaviour, ITrackableEventHandler
 {
-
+	public ScoreManager Score;
 	public GameObject EnemyPrefab;
-	public int MaxEnemies = 5;
-	public float SpawnDelay = 5f;
+	public int MaxEnemies = 10;
+	public float SpawnDelay = 3f;
 
 	private HashSet<GameObject> _enemies;
 	private float _delayTimer;
@@ -38,6 +38,7 @@ public class SpawnPoint : MonoBehaviour, ITrackableEventHandler
 			controller.PlayerCamera = Camera.main.transform;
 			controller.OnDead += () =>
 			{
+				Score.CurrentScore += 1;
 				if (_enemies.Count == MaxEnemies)
 				{
                     _delayTimer = Random.Range(SpawnDelay - 1f, SpawnDelay + 1f);

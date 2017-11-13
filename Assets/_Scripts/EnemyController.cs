@@ -24,7 +24,7 @@ public class EnemyController : MonoBehaviour {
 	private Coroutine _shootingCoroutine;
 
 	private void Start () {
-		_material = GetComponent<MeshRenderer>().material;
+		_material = GetComponentInChildren<MeshRenderer>().material;
 		_originalColor = _material.color;
 		_canvas = transform.Find("Canvas").gameObject;
 		_hpBar = _canvas.transform.Find("Foreground").GetComponent<RectTransform>();
