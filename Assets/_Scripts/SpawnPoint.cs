@@ -11,23 +11,29 @@ public class SpawnPoint : MonoBehaviour, ITrackableEventHandler
 	public float SpawnDelay = 5f;
 
 	private HashSet<GameObject> _enemies;
-	private float _delayTimer = 0f;
+	private float _delayTimer;
+	private bool _engaged;
+	private TrackableBehaviour _trackable;
 
 	private void Start () {
 		_enemies = new HashSet<GameObject>();
+		_trackable = GetComponent<TrackableBehaviour>();
+		if (_trackable) _trackable.RegisterTrackableEventHandler(this);
 	}
 
 	private void Update()
 	{
-		if (_delayTimer <= 0 && _enemies.Count < MaxEnemies)
+		if (_engaged && _delayTimer <= 0 && _enemies.Count < MaxEnemies)
 		{
 			var enemy = Instantiate(EnemyPrefab);
-			var x = Random.Range(-2.5f, 2.5f);
-			var y = enemy.transform.position.y;
-			var z = Random.Range(-2f, 2f);
-			enemy.transform.position = new Vector3(x, y, z);
 			enemy.transform.SetParent(transform);
-			_enemies.Add(enemy);
+			// Place on top of plane
+			enemy.transform.position = transform.position + new Vector3(0, enemy.transform.position.y, 0);
+			// Randomly on the plane
+			var x = Random.Range(-0.45f, 0.45f);
+			var z = Random.Range(-0.45f, 0.45f);
+			enemy.transform.localPosition = new Vector3(x, enemy.transform.localPosition.y, z);
+			
 			var controller = enemy.GetComponent<EnemyController>();
 			controller.PlayerCamera = Camera.main.transform;
 			controller.OnDead += () =>
@@ -38,6 +44,8 @@ public class SpawnPoint : MonoBehaviour, ITrackableEventHandler
 				}
 				_enemies.Remove(enemy);
 			};
+			
+			_enemies.Add(enemy);
 			_delayTimer = Random.Range(SpawnDelay - 1f, SpawnDelay + 1f);
 		}
 
@@ -46,5 +54,82 @@ public class SpawnPoint : MonoBehaviour, ITrackableEventHandler
 
 	public void OnTrackableStateChanged(TrackableBehaviour.Status previousStatus, TrackableBehaviour.Status newStatus)
 	{
+		if (newStatus == TrackableBehaviour.Status.DETECTED ||
+		    newStatus == TrackableBehaviour.Status.TRACKED ||
+		    newStatus == TrackableBehaviour.Status.EXTENDED_TRACKED)
+		{
+			UberDebug.LogChannel("spawn", "Enemies engaged");
+			OnEngage();
+		}
+		else if (previousStatus == TrackableBehaviour.Status.TRACKED &&
+		         newStatus == TrackableBehaviour.Status.NOT_FOUND)
+		{
+			UberDebug.LogChannel("spawn", "Enemies disengaged");
+			OnDisengage();
+		}
+		else
+		{
+			OnDisengage();
+		}
+	}
+
+	private void OnEngage()
+	{
+		_engaged = true;
+		
+		var renderers = GetComponentsInChildren<Renderer>(true);
+		var colliders = GetComponentsInChildren<Collider>(true);
+		var canvases = GetComponentsInChildren<Canvas>(true);
+		var controllers = GetComponentsInChildren<EnemyController>(true);
+
+		foreach (var renderer in renderers)
+		{
+			renderer.enabled = true;
+		}
+		
+		foreach (var collider in colliders)
+		{
+			collider.enabled = true;
+		}
+		
+		foreach (var canvas in canvases)
+		{
+			canvas.enabled = true;
+		}
+		
+		foreach (var controller in controllers)
+		{
+			controller.enabled = true;
+		}
+	}
+	
+	private void OnDisengage()
+	{
+		_engaged = false;
+		
+		var renderers = GetComponentsInChildren<Renderer>(true);
+		var colliders = GetComponentsInChildren<Collider>(true);
+		var canvases = GetComponentsInChildren<Canvas>(true);
+		var controllers = GetComponentsInChildren<EnemyController>(true);
+
+		foreach (var renderer in renderers)
+		{
+			renderer.enabled = false;
+		}
+		
+		foreach (var collider in colliders)
+		{
+			collider.enabled = false;
+		}
+		
+		foreach (var canvas in canvases)
+		{
+			canvas.enabled = false;
+		}
+		
+		foreach (var controller in controllers)
+		{
+			controller.enabled = false;
+		}
 	}
 }

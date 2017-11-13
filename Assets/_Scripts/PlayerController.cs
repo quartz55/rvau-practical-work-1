@@ -8,19 +8,19 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     private Camera _camera;
-    public GameObject BulletPrefab;
     public GameObject HitFlash;
 
-    public int RateOfFire = 3;
     public int MaxHealth = 100;
     public int HealthPoints = 100;
-    public Inventory Inventory;
+    
+    public Weapon CurrentWeapon;
 
     public delegate void EventHandler();
 
     public static event EventHandler OnDamageTaken;
 
     private bool _shooting;
+    public Transform InventoryTransform;
 
     private void Start()
     {
@@ -29,22 +29,43 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButton(0) && !_shooting)
+        if (Input.GetMouseButton(0))
         {
-            StartCoroutine(Fire());
+            var ray = _camera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            // If selecting a weapon
+            if (Physics.Raycast(ray, out hit, 50, 1 << 12))
+            {
+                var newWeapon = hit.collider.gameObject.GetComponent<DroppedWeapon>().WeaponStats;
+                Destroy(hit.collider.gameObject);
+
+                var droppedWeapon = Instantiate(CurrentWeapon.Prefab);
+                droppedWeapon.transform.SetParent(InventoryTransform);
+                droppedWeapon.transform.localPosition = new Vector3(Random.Range(-0.3f, 0.3f), 0.25f, Random.Range(-0.15f, 0.15f));
+                droppedWeapon.transform.eulerAngles = new Vector3(Random.value * 360, Random.value * 360, Random.value * 360);
+
+                CurrentWeapon = newWeapon;
+            }
+            else if (!_shooting)
+            {
+                StartCoroutine(Fire());
+            }
         }
     }
 
     private IEnumerator Fire()
     {
         _shooting = true;
-        var bullet = Instantiate(BulletPrefab);
+        var bullet = Instantiate(CurrentWeapon.BulletPrefab);
         bullet.transform.position = transform.position;
         bullet.transform.rotation = Quaternion.LookRotation(_camera.transform.forward);
-        bullet.GetComponent<Bullet>().Direction = _camera.transform.forward;
-        bullet.GetComponent<Bullet>().Speed = 1f;
+
+        var bulletScript = bullet.GetComponent<Bullet>();
+        bulletScript.Direction = _camera.transform.forward;
+        bulletScript.Speed = 1f;
+        bulletScript.Damage = CurrentWeapon.Damage;
         Destroy(bullet, 3f);
-        yield return new WaitForSeconds(1f / RateOfFire);
+        yield return new WaitForSeconds(1f / CurrentWeapon.RateOfFire);
         _shooting = false;
     }
 

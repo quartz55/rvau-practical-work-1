@@ -21,18 +21,29 @@ public class EnemyController : MonoBehaviour {
 	private RectTransform _hpBar;
 	private Material _material;
 	private Color _originalColor;
-	private bool _shoot = true;
+	private Coroutine _shootingCoroutine;
 
-	// Use this for initialization
 	private void Start () {
-		StartCoroutine(Fire());
 		_material = GetComponent<MeshRenderer>().material;
 		_originalColor = _material.color;
 		_canvas = transform.Find("Canvas").gameObject;
 		_hpBar = _canvas.transform.Find("Foreground").GetComponent<RectTransform>();
 		_canvasTransform = _canvas.GetComponent<RectTransform>();
+		if (_shootingCoroutine == null) _shootingCoroutine = StartCoroutine(Fire());
 	}
-	
+
+	private void OnEnable()
+	{
+		if (_shootingCoroutine == null) _shootingCoroutine = StartCoroutine(Fire());
+	}
+
+	private void OnDisable()
+	{
+		if (_shootingCoroutine == null) return;
+		StopCoroutine(_shootingCoroutine);
+		_shootingCoroutine = null;
+	}
+
 	// Update is called once per frame
 	private void Update () {
 		var dir = PlayerCamera.transform.position - transform.position;
@@ -45,7 +56,7 @@ public class EnemyController : MonoBehaviour {
 	
 	private IEnumerator Fire()
 	{
-		while (_shoot)
+		while (PlayerCamera != null)
 		{
 			var bullet = Instantiate(ProjectilePrefab);
 			var direction = (PlayerCamera.position - transform.position).normalized;
@@ -60,11 +71,11 @@ public class EnemyController : MonoBehaviour {
 
 	private void Hit(GameObject bullet)
 	{
-		Destroy(bullet);
-		Health = Mathf.Max(0, Health - 5);
+		Health = Mathf.Max(0, Health - bullet.GetComponent<Bullet>().Damage);
 		_material.color = Color.red;
 		_material.DOColor(_originalColor, 0.5f);
 		_hpBar.DOScaleX((float) Health / MaxHealth, 0.5f);
+		Destroy(bullet);
 		if (Health <= 0)
 		{
 			OnDead?.Invoke();

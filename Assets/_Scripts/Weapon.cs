@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public abstract class Weapon : ScriptableObject
+[CreateAssetMenu]
+public class Weapon : ScriptableObject
 {
     public string Name;
     public GameObject Prefab;
