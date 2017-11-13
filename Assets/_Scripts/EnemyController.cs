@@ -52,7 +52,7 @@ public class EnemyController : MonoBehaviour {
 			bullet.transform.position = transform.position;
 			bullet.transform.rotation = Quaternion.LookRotation(direction);
 			bullet.GetComponent<Bullet>().Direction = direction;
-			bullet.GetComponent<Bullet>().Speed = 0.25f;
+			bullet.GetComponent<Bullet>().Speed = 0.15f;
 			Destroy(bullet, 5f);
 			yield return new WaitForSeconds(1f / FireRate);
 		}
