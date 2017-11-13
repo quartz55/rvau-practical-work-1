@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     public int RateOfFire = 3;
     public int MaxHealth = 100;
     public int HealthPoints = 100;
+    public Inventory Inventory;
 
     public delegate void EventHandler();
 
@@ -41,7 +42,7 @@ public class PlayerController : MonoBehaviour
         bullet.transform.position = transform.position;
         bullet.transform.rotation = Quaternion.LookRotation(_camera.transform.forward);
         bullet.GetComponent<Bullet>().Direction = _camera.transform.forward;
-        bullet.GetComponent<Bullet>().Speed = 0.5f;
+        bullet.GetComponent<Bullet>().Speed = 1f;
         Destroy(bullet, 3f);
         yield return new WaitForSeconds(1f / RateOfFire);
         _shooting = false;

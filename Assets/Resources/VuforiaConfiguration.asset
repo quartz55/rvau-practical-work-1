@@ -44,12 +44,12 @@ MonoBehaviour:
       ContainsMagnet: 0
   databaseLoad:
     dataSetsToLoad:
-    - Test1
+    - ARToolkit
     - VuforiaMars_Images
     - VuforiaMars_Object_OT
     - VuforiaMars_VuMark
     dataSetsToActivate:
-    - Test1
+    - ARToolkit
     - VuforiaMars_Images
     - VuforiaMars_Object_OT
     - VuforiaMars_VuMark

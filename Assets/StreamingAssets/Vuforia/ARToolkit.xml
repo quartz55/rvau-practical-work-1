@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="Alterra_Postcard_4" size="8.000000 6.005333" />
+    <ImageTarget name="Alterra_Postcard_3" size="8.000000 10.657193" />
+    <ImageTarget name="Alterra_Postcard_2" size="8.000000 6.005333" />
+    <ImageTarget name="Alterra_Ticket_1" size="8.000000 6.005333" />
+  </Tracking>
+</QCARConfig>
